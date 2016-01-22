@@ -36,14 +36,19 @@ def __accession_number(number):
 
     number = str(number)
 
-    if isinstance(number, str):
+    if not isinstance(number, str):
         raise argparse.ArgumentTypeError(number+" isn't a valid accession number")
 
 def __valid_prefix(prefix):
     """Check if prefix is a valid path """
+
     prefix = str(prefix)
+
+    if os.path.basename(prefix) == prefix :
+        return prefix
+
     total_path = ""
-    for dir_name in os.path.splitext(os.path.dirname(prefix)):
+    for dir_name in os.path.split(os.path.dirname(prefix)):
         total_path = os.path.join(total_path, dir_name)
         if not os.path.isdir(total_path):
             raise argparse.ArgumentTypeError(total_path+"  is not a directory")
