@@ -30,7 +30,7 @@ def _create_parser():
                         help="studies2read, become more verbose")
     parser.add_argument("--ena-base", type=str, help="url to ena data access",
                         default="http://www.ebi.ac.uk/ena/data/view/")
-    parser.add_argument("--ftp-adresse", type=str, help="adresse to ftp save read",
+    parser.add_argument("--ftp-address", type=str, help="adresse to ftp save read",
                         default="ftp.sra.ebi.ac.uk")
     parser.add_argument("--ftp-dir", type=str, help="base directory of ftp",
                         default="vol1/fastq/")

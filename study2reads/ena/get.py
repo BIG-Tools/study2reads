@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 
 # std import
-import os
 import re
-import ftplib
 import xml.etree.ElementTree as ET
 
 # pip import
 import requests
+import ftputil
+from progressbar import ProgressBar, Percentage, Bar
 from fief import filter_effective_parameters as fief
 
 # project import
+
 
 @fief
 def study2reads_number(accession_number, ena_base):
     """ Is a generator of read accession number related to study """
 
-    #because ena is stupid
+    # because ena is stupid
     study_url = ena_base + accession_number + "&display=xml"
 
     r = requests.get(study_url)
@@ -32,24 +33,35 @@ def study2reads_number(accession_number, ena_base):
 
     return read_acc
 
+
 @fief
-def reads(accession_number, output, interactive, verbose, ena_base, ftp_adresse,
-          ftp_dir):
+def reads(accession_number, output, interactive=False, verbose=False,
+          ena_base="http://www.ebi.ac.uk/ena/data/view",
+          ftp_address="ftp.sra.ebi.ac.uk", ftp_dir="vol1/fastq/"):
     """ Write reads file with output as prefix """
 
-    ftp = ftplib.FTP(ftp_adresse)
-    ftp.login("anonymous", "anonymous")
+    with ftputil.FTPHost(ftp_address, "anonymous", "anonymous") as host:
+        for read_acc in __read_acc_str2gen(
+                study2reads_number(accession_number, ena_base)):
 
-    for read_acc in __read_acc_str2gen(
-            study2reads_number(accession_number, ena_base)):
+            ftp_read_path = __read_acc2path(read_acc)
+            for read_name in host.listdir(ftp_dir+ftp_read_path):
+                if __dl_file(read_name, interactive):
+                    if verbose:
+                        file_size = host.path.getsize(ftp_dir + ftp_read_path +
+                                                      read_name)
+                        pbar = __ProgressBar(widgets=[read_name, ":",
+                                                      Percentage(),
+                                                      Bar()],
+                                             maxval=file_size).start()
+                        host.download(ftp_dir + ftp_read_path + read_name,
+                                      output + read_name,
+                                      callback=pbar.update)
+                        pbar.finish()
+                    else:
+                        host.download(ftp_dir + ftp_read_path + read_name,
+                                      output + read_name)
 
-        ftp_read_path = __read_acc2path(read_acc)
-        for read_name in ftp.nlst(ftp_dir + ftp_read_path):
-            print(read_name)
-            with open(output+os.path.basename(read_name), 'wb') as outfile:
-                ftp.retrbinary('RETR ' + read_name, outfile.write)
-
-    ftp.close()
 
 def __read_acc_str2gen(read_acc_str):
     """ take XXX1011-XXX1021,XXX2030-XXX2049 and yield intermediate value """
@@ -64,6 +76,7 @@ def __read_acc_str2gen(read_acc_str):
 
             for index in range(int(first), int(second)):
                 yield prefix + str(index)
+
 
 def __read_acc2path(read_acc):
     """ Generate the url of reads """
@@ -81,3 +94,27 @@ def __read_acc2path(read_acc):
         return read_acc[:6] + "/" + read_acc[-3:-1] + "/" + read_acc + "/"
     else:
         raise AttributeError(read_acc + " isn't a valid read_acc")
+
+
+def __dl_file(read_name, interactive):
+    if interactive:
+        answer = input("download "+read_name+" (Y/n) : ")
+        return answer.startswith("y")
+    else:
+        return True
+
+
+class __ProgressBar(ProgressBar):
+
+    def __init__(self, **arg):
+        self.__val = 0
+        super().__init__(**arg)
+
+    def start(self):
+        return super().start()
+
+    def update(self, val):
+        if isinstance(val, bytes):
+            self.__val += len(val)
+
+        return super().update(self.__val)
