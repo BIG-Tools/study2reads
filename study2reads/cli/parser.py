@@ -4,6 +4,7 @@
 import os
 import argparse
 
+
 def read_arg(args):
     """ Take a iterable and return a dict with valid argument """
 
@@ -12,6 +13,7 @@ def read_arg(args):
     arg = vars(parser.parse_args(args))
 
     return arg
+
 
 def _create_parser():
     """ Create argparse argument parser """
@@ -30,12 +32,14 @@ def _create_parser():
                         help="studies2read, become more verbose")
     parser.add_argument("--ena-base", type=str, help="url to ena data access",
                         default="http://www.ebi.ac.uk/ena/data/view/")
-    parser.add_argument("--ftp-address", type=str, help="adresse to ftp save read",
+    parser.add_argument("--ftp-address", type=str,
+                        help="adresse to ftp save read",
                         default="ftp.sra.ebi.ac.uk")
     parser.add_argument("--ftp-dir", type=str, help="base directory of ftp",
                         default="vol1/fastq/")
 
     return parser
+
 
 def __accession_number(number):
     """ Test if number is a valid accession number """
@@ -43,9 +47,11 @@ def __accession_number(number):
     number = str(number)
 
     if not isinstance(number, str):
-        raise argparse.ArgumentTypeError(number+" isn't a valid accession number")
+        raise argparse.ArgumentTypeError(number +
+                                         " isn't a valid accession number")
 
     return number
+
 
 def __valid_prefix(prefix):
     """Check if prefix is a valid path """

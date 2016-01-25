@@ -11,6 +11,7 @@ import sys
 from . import cli
 from . import ena
 
+
 def main(arg):
     """ Main function of study2reads function """
     ena.get.reads(**arg)
@@ -18,4 +19,3 @@ def main(arg):
 if __name__ == "__main__":
 
     main(cli.parser.read_arg(sys.argv[1:]))
-
