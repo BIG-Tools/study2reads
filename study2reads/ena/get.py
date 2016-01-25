@@ -5,10 +5,10 @@ import re
 import xml.etree.ElementTree as ET
 
 # pip import
-import requests
 import ftputil
 from progressbar import ProgressBar, Percentage, Bar, ETA
 from fief import filter_effective_parameters as fief
+import requests
 
 # project import
 
@@ -20,11 +20,11 @@ def study2reads_number(accession_number, ena_base):
     # because ena is stupid
     study_url = ena_base + accession_number + "&display=xml"
 
-    r = requests.get(study_url)
+    req_ret = requests.get(study_url)
 
-    r.raise_for_status()
+    req_ret.raise_for_status()
 
-    xml_root = ET.fromstring(r.text)
+    xml_root = ET.fromstring(req_ret.text)
 
     read_acc = ""
     for xref in xml_root.findall("STUDY/STUDY_LINKS/STUDY_LINK/"):
@@ -50,10 +50,10 @@ def reads(accession_number, output, interactive=False, verbose=False,
                     if verbose:
                         file_size = host.path.getsize(ftp_dir + ftp_read_path +
                                                       read_name)
-                        pbar = __ProgressBar(widgets=[read_name, ":",
-                                                      Percentage(),
-                                                      Bar(), ETA()],
-                                             maxval=file_size).start()
+                        pbar = _ProgressBar(widgets=[read_name, ":",
+                                                     Percentage(),
+                                                     Bar(), ETA()],
+                                            maxval=file_size).start()
                         host.download(ftp_dir + ftp_read_path + read_name,
                                       output + read_name,
                                       callback=pbar.update)
@@ -104,7 +104,7 @@ def __dl_file(read_name, interactive):
         return True
 
 
-class __ProgressBar(ProgressBar):
+class _ProgressBar(ProgressBar):
 
     def __init__(self, **arg):
         self.__val = 0
@@ -113,7 +113,7 @@ class __ProgressBar(ProgressBar):
     def start(self):
         return super().start()
 
-    def update(self, val):
+    def update(self, val=None):
         if isinstance(val, bytes):
             self.__val += len(val)
 

@@ -20,13 +20,13 @@ def _create_parser():
                                      formatter_class=argparse.
                                      ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("-a", "--accession-number", type=__accession_number, 
+    parser.add_argument("-a", "--accession-number", type=__accession_number,
                         help="accession number of studies you want dl reads")
-    parser.add_argument("-o", "--output", type=__valid_prefix, 
+    parser.add_argument("-o", "--output", type=__valid_prefix,
                         help="prefix of reads file")
     parser.add_argument("-i", "--interactive", action='store_true',
                         help="ask for each read file if you want dl it")
-    parser.add_argument("-v", "--verbose", action='store_true', 
+    parser.add_argument("-v", "--verbose", action='store_true',
                         help="studies2read, become more verbose")
     parser.add_argument("--ena-base", type=str, help="url to ena data access",
                         default="http://www.ebi.ac.uk/ena/data/view/")
@@ -52,7 +52,7 @@ def __valid_prefix(prefix):
 
     prefix = str(prefix)
 
-    if os.path.basename(prefix) == prefix :
+    if os.path.basename(prefix) == prefix:
         return prefix
 
     total_path = ""
