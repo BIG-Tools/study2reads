@@ -28,6 +28,12 @@ def _create_parser():
                         help="ask for each read file if you want dl it")
     parser.add_argument("-v", "--verbose", action='store_true', 
                         help="studies2read, become more verbose")
+    parser.add_argument("--ena-base", type=str, help="url to ena data access",
+                        default="http://www.ebi.ac.uk/ena/data/view/")
+    parser.add_argument("--ftp-adresse", type=str, help="adresse to ftp save read",
+                        default="ftp.sra.ebi.ac.uk")
+    parser.add_argument("--ftp-dir", type=str, help="base directory of ftp",
+                        default="vol1/fastq/")
 
     return parser
 
@@ -39,6 +45,8 @@ def __accession_number(number):
     if not isinstance(number, str):
         raise argparse.ArgumentTypeError(number+" isn't a valid accession number")
 
+    return number
+
 def __valid_prefix(prefix):
     """Check if prefix is a valid path """
 
@@ -49,6 +57,10 @@ def __valid_prefix(prefix):
 
     total_path = ""
     for dir_name in os.path.split(os.path.dirname(prefix)):
+
+        if not dir_name:
+            break
+
         total_path = os.path.join(total_path, dir_name)
         if not os.path.isdir(total_path):
             raise argparse.ArgumentTypeError(total_path+"  is not a directory")
