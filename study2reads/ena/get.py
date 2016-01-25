@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 # pip import
 import requests
 import ftputil
-from progressbar import ProgressBar, Percentage, Bar
+from progressbar import ProgressBar, Percentage, Bar, ETA
 from fief import filter_effective_parameters as fief
 
 # project import
@@ -52,7 +52,7 @@ def reads(accession_number, output, interactive=False, verbose=False,
                                                       read_name)
                         pbar = __ProgressBar(widgets=[read_name, ":",
                                                       Percentage(),
-                                                      Bar()],
+                                                      Bar(), ETA()],
                                              maxval=file_size).start()
                         host.download(ftp_dir + ftp_read_path + read_name,
                                       output + read_name,
