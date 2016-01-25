@@ -1,2 +1,4 @@
 fief==1.0.1
+ftputil==3.3
+progressbar33==2.4
 requests==2.9.1
