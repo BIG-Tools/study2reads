@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Read study information and download reads
+"""
+
 # std import
 import re
 import xml.etree.ElementTree as ET
@@ -11,27 +15,6 @@ from fief import filter_effective_parameters as fief
 import requests
 
 # project import
-
-
-@fief
-def study2reads_number(accession_number, ena_base):
-    """ Is a generator of read accession number related to study """
-
-    # because ena is stupid
-    study_url = ena_base + accession_number + "&display=xml"
-
-    req_ret = requests.get(study_url)
-
-    req_ret.raise_for_status()
-
-    xml_root = ET.fromstring(req_ret.text)
-
-    read_acc = ""
-    for xref in xml_root.findall("STUDY/STUDY_LINKS/STUDY_LINK/"):
-        if list(xref)[0].text == "ENA-RUN":
-            read_acc += "," + list(xref)[1].text
-
-    return read_acc
 
 
 @fief
@@ -61,6 +44,27 @@ def reads(accession_number, output, interactive=False, verbose=False,
                     else:
                         host.download(ftp_dir + ftp_read_path + read_name,
                                       output + read_name)
+
+
+@fief
+def study2reads_number(accession_number, ena_base):
+    """ Is a generator of read accession number related to study """
+
+    # because ena is stupid
+    study_url = ena_base + accession_number + "&display=xml"
+
+    req_ret = requests.get(study_url)
+
+    req_ret.raise_for_status()
+
+    xml_root = ET.fromstring(req_ret.text)
+
+    read_acc = ""
+    for xref in xml_root.findall("STUDY/STUDY_LINKS/STUDY_LINK/"):
+        if list(xref)[0].text == "ENA-RUN":
+            read_acc += "," + list(xref)[1].text
+
+    return read_acc
 
 
 def __read_acc_str2gen(read_acc_str):
@@ -97,6 +101,7 @@ def __read_acc2path(read_acc):
 
 
 def __dl_file(read_name, interactive):
+    """ Answer to user for dl read or not """
     if interactive:
         answer = input("download "+read_name+" (Y/n) : ")
         return answer.startswith("y")
@@ -105,12 +110,14 @@ def __dl_file(read_name, interactive):
 
 
 class _ProgressBar(ProgressBar):
+    """ Derivation of ProgressBar for save actual value """
 
     def __init__(self, **arg):
         self.__val = 0
         super().__init__(**arg)
 
     def start(self):
+        self.__val = 0
         return super().start()
 
     def update(self, val=None):

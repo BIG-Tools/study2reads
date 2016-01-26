@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Read and control value of cli argument
+"""
+
 # std import
 import os
 import argparse
