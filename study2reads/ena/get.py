@@ -26,7 +26,6 @@ def reads(accession_number, output, interactive=False, verbose=False,
     with ftputil.FTPHost(ftp_address, "anonymous", "anonymous") as host:
         for read_acc in __read_acc_str2gen(
                 study2reads_number(accession_number, ena_base)):
-
             ftp_read_path = __read_acc2path(read_acc)
             for read_name in host.listdir(ftp_dir+ftp_read_path):
                 if __dl_file(read_name, interactive):
@@ -59,28 +58,34 @@ def study2reads_number(accession_number, ena_base):
 
     xml_root = ET.fromstring(req_ret.text)
 
-    read_acc = ""
+    read_acc = list()
     for xref in xml_root.findall("STUDY/STUDY_LINKS/STUDY_LINK/"):
         if list(xref)[0].text == "ENA-RUN":
-            read_acc += "," + list(xref)[1].text
+            read_acc.append(list(xref)[1].text)
 
-    return read_acc
+    return ",".join(read_acc)
 
 
 def __read_acc_str2gen(read_acc_str):
     """ take XXX1011-XXX1021,XXX2030-XXX2049 and yield intermediate value """
+    reg_allown = re.compile(r"((([^-,\d]+)(\d+))*([-,\s]?))")
 
-    get_numb = re.compile(r"([^\d]+)(\d+)-[^\d]+(\d+)")
+    save_last = list()
+    for match in reg_allown.findall(read_acc_str):
+        if match[4] == ',':
+            yield match[1]
+        elif match[4] == '-':
+            save_last = match
+        elif match[4] == '' and save_last:
+            len_number = len(save_last[3])
+            prefix = save_last[2]
+            for index in range(int(save_last[3]), int(match[3])):
+                index = str(index)
+                yield prefix + '0'*(len_number-len(index)) + index
 
-    for sub_read_acc in read_acc_str.split(",")[1:]:
+            save_last = list()
 
-        match = get_numb.search(sub_read_acc)
-        if match:
-            (prefix, first, second) = match.groups()
-
-            for index in range(int(first), int(second)):
-                yield prefix + str(index)
-
+            
 
 def __read_acc2path(read_acc):
     """ Generate the url of reads """
