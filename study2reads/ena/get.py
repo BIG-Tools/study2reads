@@ -72,14 +72,14 @@ def __read_acc_str2gen(read_acc_str):
 
     save_last = list()
     for match in reg_allown.findall(read_acc_str):
-        if match[4] == ',':
+        if match[4] == ',' and not save_last:
             yield match[1]
         elif match[4] == '-':
             save_last = match
-        elif match[4] == '' and save_last:
+        elif (match[4] == '' or match[4] == ',') and save_last:
             len_number = len(save_last[3])
             prefix = save_last[2]
-            for index in range(int(save_last[3]), int(match[3])):
+            for index in range(int(save_last[3]), int(match[3])+1):
                 index = str(index)
                 yield prefix + '0'*(len_number-len(index)) + index
 
