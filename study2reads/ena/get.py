@@ -71,8 +71,7 @@ def __read_acc_str2gen(read_acc_str):
     reg_allown = re.compile(r"((([^-,\d]+)(\d+))*([-,\s]?))")
 
     save_last = list()
-    for match in reg_allown.findall(read_acc_str):
-        print(match)
+    for match in reg_allown.findall(read_acc_str)[:-1]:
         if (match[4] == ',' or match[4] == '') and not save_last:
             yield match[1]
         elif match[4] == '-':
