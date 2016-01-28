@@ -80,18 +80,18 @@ def __read_acc_str2gen(read_acc_str):
         yield all_match[0][:2]
 
     # read element by 2-mer
-    for (current, future) in [all_match[i:i+2]
-                              for i in range(len(all_match) - 1)]:
-        if current[2] == ',':
+    for ((prefix, first, sep), (_, last, _)) in [all_match[i:i+2] for i in
+                                                 range(len(all_match) - 1)]:
+        if sep == ',':
             # no successor we yield it
-            yield "".join(current[:2])
+            yield prefix + first
 
-        if current[2] == '-':
+        if sep == '-':
             # begin of series
-            len_number = len(current[1])  # take size of suffix
-            prefix = current[0]  # take suffix
+            len_number = len(first)  # take size of suffix
+
             # loop on begin to end - 1 (end is yield on next general loop)
-            for index in range(int(current[1]), int(future[1])):
+            for index in range(int(first), int(last)):
                 index = str(index)
                 # element is prefix + some 0 to complete the length of
                 # numeric part + the numeric part
