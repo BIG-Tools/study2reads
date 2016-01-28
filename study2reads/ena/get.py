@@ -68,24 +68,35 @@ def study2reads_number(accession_number, ena_base):
 
 def __read_acc_str2gen(read_acc_str):
     """ take XXX1011-XXX1021,XXX2030-XXX2049 and yield intermediate value """
-    reg_allown = re.compile(r"((([^-,\d]+)(\d+))*([-,\s]?))")
 
-    save_last = list()
-    for match in reg_allown.findall(read_acc_str)[:-1]:
-        if (match[4] == ',' or match[4] == '') and not save_last:
-            yield match[1]
-        elif match[4] == '-':
-            save_last = match
-        elif (match[4] == '' or match[4] == ',') and save_last:
-            len_number = len(save_last[3])
-            prefix = save_last[2]
-            for index in range(int(save_last[3]), int(match[3])+1):
+    # take prefix, numeric part and ponctuation
+    cut = re.compile(r"([^-,\d]+)(\d+)([-,]?)")
+
+    # add false value to the end for remove some side effect
+    all_match = cut.findall(read_acc_str + ',')
+    all_match.append(['', '', ''])
+
+    if len(all_match) <= 1:  # if you don't understand tha your are stupid
+        yield all_match[0][:2]
+
+    # read element by 2-mer
+    for (current, future) in [all_match[i:i+2]
+                              for i in range(len(all_match) - 1)]:
+        if current[2] == ',':
+            # no successor we yield it
+            yield "".join(current[:2])
+
+        if current[2] == '-':
+            # begin of series
+            len_number = len(current[1])  # take size of suffix
+            prefix = current[0]  # take suffix
+            # loop on begin to end - 1 (end is yield on next general loop)
+            for index in range(int(current[1]), int(future[1])):
                 index = str(index)
+                # element is prefix + some 0 to complete the length of
+                # numeric part + the numeric part
                 yield prefix + '0'*(len_number-len(index)) + index
 
-            save_last = list()
-
-            
 
 def __read_acc2path(read_acc):
     """ Generate the url of reads """
